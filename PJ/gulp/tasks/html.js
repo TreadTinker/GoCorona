@@ -9,31 +9,39 @@ export const html = () => {
             app.plugins.notify.onError({
                 title : "HTML",
                 message : "Error: <%= error.message %>"
-            }))
-        )
+            })
+        ))
         // Подключение файлов
         .pipe(fileinclude())
         // Замена имени папки при сборке
         .pipe(app.plugins.replace(/@img\//g, 'img/'))
         // Конвертирование изображений в Webp
-        .pipe(webpHtmlNosvg())
+        .pipe(
+            app.plugins.if(
+                app.isbuild,
+                webpHtmlNosvg()
+                )
+        )    
         // Вывод версии с датой и временем
         .pipe(
-            versionNumber({
-                'value' : '%DT%',
-                'append' : {
-                    'key' : '_v',
-                    'cover' : 0,
-                    'to' : [
-                        'css',
-                        'js',
-                    ]
-                },
-                'output' : {
-                    'file' : 'gulp/version.json'
-                }
-            })
-        )
+            app.plugins.if(
+                app.isbuild,
+                    versionNumber({
+                        'value' : '%DT%',
+                        'append' : {
+                            'key' : '_v',
+                            'cover' : 0,
+                            'to' : [
+                                'css',
+                                'js',
+                            ]
+                        },
+                        'output' : {
+                            'file' : 'gulp/version.json'
+                        }
+                    })
+            )
+        )    
         .pipe(app.gulp.dest(app.path.build.html))
         .pipe(app.plugins.browsersync.stream());
 };

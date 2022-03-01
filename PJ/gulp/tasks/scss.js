@@ -10,7 +10,7 @@ import groupCssMediaQueries from 'gulp-group-css-media-queries';// Группи�
 const sass = gulpSass(dartSass);
 
 export const scss = () => {
-    return app.gulp.src(app.path.src.scss, { sourcemaps: true })
+    return app.gulp.src(app.path.src.scss, { sourcemaps: app.isDev })
         .pipe(app.plugins.plumber(
             app.plugins.notify.onError({
                 title : "SASS",
@@ -21,22 +21,41 @@ export const scss = () => {
         .pipe(sass({
             outputStyle: 'expanded'
         }))
-        .pipe(groupCssMediaQueries())
+        .pipe(
+            app.plugins.if(
+                app.isbuild,
+                groupCssMediaQueries()
+            )
+        )    
         // Вывод Webp
-        .pipe(webpcss(
-            {
+        .pipe(
+            app.plugins.if(
+                app.isbuild,
+                webpcss({
                 webpClass: ".webp",
                 noWebpClass: ".no-webp"
             }
-        ))
-        .pipe(autoprefixer({
+                )
+            )
+        )   
+        .pipe(
+            app.plugins.if(
+                app.isbuild,
+                autoprefixer({
             grid: true,
             overrideBrowserslist: ["last 3 version"],
             cascade: true
-        }))
+                })
+            )
+        )    
         // Раскомментировать если нужен не сжатый файл стилей
         .pipe(app.gulp.dest(app.path.build.css))
-        .pipe(cleanCss())
+        .pipe(
+            app.plugins.if(
+                app.isbuild,
+                cleanCss()
+            )
+        )
         .pipe(rename({
             extname : ".min.css"
         }))
