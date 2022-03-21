@@ -1,3 +1,3 @@
-This project was build by no JS
+This project was build by not use JS
 Thanks for watching my projects
 <3
